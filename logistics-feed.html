@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HANA Logistics – Industry News</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #f5f6fa;
+    --surface: #ffffff;
+    --surface2:#e8f0fb;
+    --border:  #e2e6ef;
+    --accent:  #2b579a;
+    --accent2: #1e3f73;
+    --text:    #1a2236;
+    --muted:   #6b7a99;
+    --card-bg: #ffffff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Fullscreen button */
+  #fullscreen-btn {
+    position: fixed;
+    top: 12px; right: 12px; z-index: 9999;
+    background: rgba(43,87,154,0.1);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    width: 32px; height: 32px; border-radius: 6px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(8px); transition: all 0.2s;
+  }
+  #fullscreen-btn:hover { background: rgba(43,87,154,0.2); }
+  #fullscreen-btn svg { width: 16px; height: 16px; }
+
+  /* Header */
+  header {
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 16px;
+    background: var(--accent);
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 8px rgba(43,87,154,0.15);
+  }
+
+  .logo-mark {
+    width: 36px; height: 36px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 13px;
+    letter-spacing: -0.5px; flex-shrink: 0; color: #fff;
+    border: 1px solid rgba(255,255,255,0.3);
+  }
+
+  .header-text h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px; font-weight: 700;
+    letter-spacing: 0.02em; color: #fff; line-height: 1;
+  }
+  .header-text p {
+    font-size: 11px; color: rgba(255,255,255,0.7);
+    margin-top: 2px; text-transform: uppercase; letter-spacing: 0.08em;
+  }
+
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+  .live-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #4ade80; box-shadow: 0 0 8px #4ade80;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity:1; transform:scale(1); }
+    50%      { opacity:.6; transform:scale(1.3); }
+  }
+
+  .last-updated { font-size: 11px; color: rgba(255,255,255,0.75); }
+
+  /* Filter tabs */
+  .filter-bar {
+    padding: 10px 24px;
+    display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .filter-bar::-webkit-scrollbar { display: none; }
+
+  .filter-btn {
+    padding: 5px 14px; border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent; color: var(--muted);
+    font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+    cursor: pointer; white-space: nowrap; transition: all 0.2s;
+  }
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+
+  /* Source colors */
+  .source-fw  { --src-color: #f97316; }
+  .source-joc { --src-color: #2b579a; }
+  .source-lm  { --src-color: #7c3aed; }
+  .source-scb { --src-color: #059669; }
+  .source-lv  { --src-color: #d97706; }
+
+  /* Grid */
+  .grid-container {
+    padding: 18px 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+
+  /* Card */
+  .news-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+    display: flex; flex-direction: column;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    animation: fadeUp 0.4s ease both;
+    cursor: pointer; text-decoration: none;
+  }
+  .news-card:hover {
+    transform: translateY(-3px);
+    border-color: #c7d9f5;
+    box-shadow: 0 8px 28px rgba(43,87,154,0.13), 0 0 0 1px rgba(43,87,154,0.08);
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(16px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  .card-thumb {
+    width: 100%; height: 140px;
+    object-fit: cover; background: var(--surface2);
+    flex-shrink: 0; display: block;
+  }
+
+  .card-thumb-placeholder {
+    width: 100%; height: 140px;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; position: relative; overflow: hidden;
+  }
+  .card-thumb-placeholder::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, var(--src-color, var(--accent)) 0%, transparent 60%);
+    opacity: 0.12;
+  }
+  .placeholder-icon { font-size: 36px; opacity: 0.3; }
+
+  .card-body {
+    padding: 14px 16px 16px;
+    display: flex; flex-direction: column; flex: 1; gap: 8px;
+  }
+
+  .card-meta { display: flex; align-items: center; gap: 8px; }
+
+  .source-badge {
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    padding: 3px 8px; border-radius: 4px;
+    background: color-mix(in srgb, var(--src-color, var(--accent)) 10%, transparent);
+    color: var(--src-color, var(--accent));
+    border: 1px solid color-mix(in srgb, var(--src-color, var(--accent)) 25%, transparent);
+  }
+
+  .card-date { font-size: 11px; color: var(--muted); margin-left: auto; }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px; font-weight: 600; line-height: 1.4; color: var(--text);
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .news-card:hover .card-title { color: var(--accent); }
+
+  .card-desc {
+    font-size: 12px; color: var(--muted); line-height: 1.55;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+    flex: 1;
+  }
+
+  .card-footer {
+    display: flex; align-items: center;
+    padding-top: 8px; border-top: 1px solid var(--border);
+  }
+
+  .read-link {
+    font-size: 11px; font-weight: 600; color: var(--accent);
+    text-decoration: none; letter-spacing: 0.04em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .read-link svg { width: 12px; height: 12px; }
+
+  /* States */
+  .state-box {
+    grid-column: 1 / -1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 60px 24px; gap: 16px; color: var(--muted);
+  }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--border); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .empty-msg { font-size: 14px; }
+
+  .refresh-btn {
+    background: var(--accent); border: none; color: #fff;
+    padding: 6px 18px; border-radius: 6px; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity .2s;
+  }
+  .refresh-btn:hover { opacity: .85; }
+
+  .count-info { padding: 0 24px 6px; font-size: 11px; color: var(--muted); }
+  .count-info strong { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<button id="fullscreen-btn" onclick="toggleFullscreen()" title="Toàn màn hình">
+  <svg id="fs-icon-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+  </svg>
+  <svg id="fs-icon-compress" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+    <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
+  </svg>
+</button>
+
+<header>
+  <div class="logo-mark">HL</div>
+  <div class="header-text">
+    <h1>HANA Logistics — Industry News</h1>
+    <p>Live Feed · Freight &amp; Supply Chain</p>
+  </div>
+  <div class="header-right">
+    <div class="live-dot"></div>
+    <span class="last-updated" id="last-updated">Đang tải…</span>
+  </div>
+</header>
+
+<div class="filter-bar">
+  <button class="filter-btn active" onclick="filterSource('all', this)">Tất cả</button>
+  <button class="filter-btn" onclick="filterSource('FreightWaves', this)">FreightWaves</button>
+  <button class="filter-btn" onclick="filterSource('JOC', this)">JOC</button>
+  <button class="filter-btn" onclick="filterSource('Logistics Management', this)">Log. Management</button>
+  <button class="filter-btn" onclick="filterSource('SupplyChainBrain', this)">SupplyChainBrain</button>
+  <button class="filter-btn" onclick="filterSource('Logistics Viewpoints', this)">Log. Viewpoints</button>
+</div>
+
+<div class="count-info" id="count-info"></div>
+
+<div class="grid-container" id="grid">
+  <div class="state-box"><div class="spinner"></div><span class="empty-msg">Đang tải tin tức…</span></div>
+</div>
+
+<script>
+const RSS2JSON = 'https://api.rss2json.com/v1/api.json?rss_url=';
+
+const SOURCES = [
+  { name:'FreightWaves',        cssClass:'source-fw',  icon:'🚢', url:'https://www.freightwaves.com/feed' },
+  { name:'JOC',                 cssClass:'source-joc', icon:'📦', url:'https://www.joc.com/rssfeed' },
+  { name:'Logistics Management',cssClass:'source-lm',  icon:'📊', url:'https://feeds.feedburner.com/logisticsmgmt/latest' },
+  { name:'SupplyChainBrain',    cssClass:'source-scb', icon:'🧠', url:'https://www.supplychainbrain.com/rss/articles' },
+  { name:'Logistics Viewpoints',cssClass:'source-lv',  icon:'🔍', url:'https://logisticsviewpoints.com/feed' },
+];
+
+let allItems = [];
+let currentFilter = 'all';
+
+function stripHtml(html) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html || '';
+  return tmp.textContent || tmp.innerText || '';
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d)) return '';
+  const diff = Math.floor((Date.now() - d) / 60000);
+  if (diff < 60)   return diff + 'p trước';
+  if (diff < 1440) return Math.floor(diff/60) + 'h trước';
+  return Math.floor(diff/1440) + ' ngày trước';
+}
+
+function extractImage(item) {
+  if (item.enclosure && item.enclosure.link && item.enclosure.type && item.enclosure.type.startsWith('image'))
+    return item.enclosure.link;
+  if (item.thumbnail && item.thumbnail.startsWith('http')) return item.thumbnail;
+  if (item.content) {
+    const match = item.content.match(/<img[^>]+src="([^"]+)"/i);
+    if (match) return match[1];
+  }
+  return null;
+}
+
+async function fetchSource(source) {
+  try {
+    const url = RSS2JSON + encodeURIComponent(source.url) + '&count=10';
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (data.status !== 'ok') return [];
+    return (data.items || []).map(item => ({
+      source:      source.name,
+      cssClass:    source.cssClass,
+      icon:        source.icon,
+      title:       item.title || '',
+      description: stripHtml(item.description || item.content || '').substring(0, 200),
+      link:        item.link || '#',
+      pubDate:     item.pubDate,
+      image:       extractImage(item)
+    }));
+  } catch(e) {
+    console.warn('Failed:', source.name, e);
+    return [];
+  }
+}
+
+async function loadAll() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '<div class="state-box"><div class="spinner"></div><span class="empty-msg">Đang tải tin tức…</span></div>';
+
+  const results = await Promise.allSettled(SOURCES.map(fetchSource));
+  allItems = results
+    .flatMap(r => r.status === 'fulfilled' ? r.value : [])
+    .sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+
+  document.getElementById('last-updated').textContent =
+    'Cập nhật ' + new Date().toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
+
+  renderCards(allItems);
+}
+
+function renderCards(items) {
+  const grid = document.getElementById('grid');
+  const info = document.getElementById('count-info');
+
+  if (!items.length) {
+    grid.innerHTML = `<div class="state-box">
+      <span style="font-size:32px">📭</span>
+      <span class="empty-msg">Không tìm thấy bài viết.</span>
+      <button class="refresh-btn" onclick="loadAll()">🔄 Thử lại</button>
+    </div>`;
+    info.innerHTML = ''; return;
+  }
+
+  info.innerHTML = `<strong>${items.length}</strong> bài viết`;
+
+  grid.innerHTML = items.map((item, i) => {
+    const delay  = Math.min(i * 40, 600);
+    const imgHtml = item.image
+      ? `<img class="card-thumb" src="${item.image}" alt="" loading="lazy"
+              onerror="this.parentElement.innerHTML='<div class=\\"card-thumb-placeholder\\"><span class=\\"placeholder-icon\\">${item.icon}</span></div>'">`
+      : `<div class="card-thumb-placeholder"><span class="placeholder-icon">${item.icon}</span></div>`;
+
+    return `
+    <a class="news-card ${item.cssClass}" href="${item.link}" target="_blank" rel="noopener"
+       style="animation-delay:${delay}ms">
+      ${imgHtml}
+      <div class="card-body">
+        <div class="card-meta">
+          <span class="source-badge">${item.source}</span>
+          <span class="card-date">${formatDate(item.pubDate)}</span>
+        </div>
+        <div class="card-title">${item.title}</div>
+        <div class="card-desc">${item.description}</div>
+        <div class="card-footer">
+          <span class="read-link">Read more
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </span>
+        </div>
+      </div>
+    </a>`;
+  }).join('');
+}
+
+function filterSource(source, btn) {
+  currentFilter = source;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const filtered = source === 'all' ? allItems : allItems.filter(i => i.source === source);
+  renderCards(filtered);
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+    document.getElementById('fs-icon-expand').style.display = 'none';
+    document.getElementById('fs-icon-compress').style.display = 'block';
+  } else {
+    document.exitFullscreen();
+    document.getElementById('fs-icon-expand').style.display = 'block';
+    document.getElementById('fs-icon-compress').style.display = 'none';
+  }
+}
+
+loadAll();
+setInterval(loadAll, 15 * 60 * 1000);
+</script>
+</body>
+</html>
